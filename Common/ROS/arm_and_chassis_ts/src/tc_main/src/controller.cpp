@@ -1,5 +1,5 @@
 
-#include "simple_ackermann_steering_controller.hpp"
+#include "controller.hpp"
 
 // Config.
 #define LOOP_HZ 25
@@ -30,6 +30,9 @@
 #include <algorithm>
 using namespace std;
 
+enum t_turn {TURN_LEFT, TURN_NONE, TURN_RIGHT};
+enum t_move {MOVE_FORWARD, MOVE_NONE, MOVE_REVERSE};
+
 #include <angles/angles.h>
 
 
@@ -44,7 +47,8 @@ SimpleAckermannSteeringController::SimpleAckermannSteeringController(ros::NodeHa
 	nh(nh),
 	all_motors_sim(false),
 	drv_fd(-1),
-	motors_en(true)
+	motors_en(true),
+	UART uart("/dev/serial0", 115200)
 {
 	
 	
@@ -226,6 +230,49 @@ void SimpleAckermannSteeringController::cmd_cb(
 		float sa = -steering_angle; // + is left.
 		duty[1] = rad2duty(sa);
 		
+		//UART
+		t_turn turn = TURN_NONE;
+		if(steering_angle > M_PI/6){
+			turn = TURN_RIGHT;
+		}else if(steering_angle < -M_PI/6){
+			turn = TURN_LEFT;
+		}
+
+		t_move move = MOVE_NONE;
+		if(speed < -130){
+			move = MOVE_FORWARD;
+		}else if(speed > -100){
+			move = MOVE_REVERSE;
+		}
+		
+		vector<uint8_t> cmd;
+		uint8_t chassis_move;
+		switch(move){
+			case MOVE_NONE:
+				chassis_move = 0;
+				break;
+			case MOVE_FORWARD:
+				chassis_move = 2;
+				break;
+			case MOVE_REVERSE:
+				chassis_move = 3;
+				break;
+		}
+		uint8_t chassis_turn;
+		switch(turn){
+			case TURN_NONE:
+				chassis_turn = 0;
+				break;
+			case TURN_RIGHT:
+				chassis_turn = 1;
+				break;
+			case TURN_LEFT:
+				chassis_turn = 2;
+				break;
+		}
+		uint8_t chassis = (chassis_turn << 2) | chassis_move;
+		cmd.push_back(chassis);
+		uart.write(cmd);
 		
 		seek();
 		

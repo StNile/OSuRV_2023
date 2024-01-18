@@ -52,10 +52,6 @@ static T sym_clamp(T x, T limit) {
 }
 
 RobotHardwareInterface::RobotHardwareInterface(ros::NodeHandle& nh) :
-	int uart_fd;  // File descriptor for the UART port
-	const char* uart_device = "/dev/ttyUSB0";  // Change this to your UART device
-    std::vector<double> uart_data; 
-
 	nh(nh),
 	first_print(true),
 	n_joints(0), 
@@ -104,32 +100,14 @@ RobotHardwareInterface::RobotHardwareInterface(ros::NodeHandle& nh) :
 	
 	
 	if(!all_motors_sim){
-		// Open UART port
-		uart_fd = open(uart_device, O_RDWR | O_NOCTTY);
-		if (uart_fd < 0) {
-			ROS_WARN("UART port not opened! uart_fd = %d -> %s", uart_fd, strerror(errno));
-		}
-
-		// Configure UART settings
-		struct termios uart_options;
-		tcgetattr(uart_fd, &uart_options);
-		cfsetispeed(&uart_options, B9600);  // Set baud rate to 9600 (adjust as needed)
-		cfsetospeed(&uart_options, B9600);
-		uart_options.c_cflag &= ~PARENB;    // No parity
-		uart_options.c_cflag &= ~CSTOPB;    // 1 stop bit
-		uart_options.c_cflag &= ~CSIZE;
-		uart_options.c_cflag |= CS8;        // 8 data bits
-		tcsetattr(uart_fd, TCSANOW, &uart_options);
-		
 		// Open driver.
-		/*
 		drv_fd = open(DEV_FN, O_RDWR);
 		if(drv_fd < 0){
 			ROS_WARN(
 				"\"%s\" not opened! drv_fd = %d -> %s",
 				DEV_FN, drv_fd, strerror(-drv_fd)
 			);
-		} */
+		} 
 	}
 	
 	
@@ -173,14 +151,9 @@ RobotHardwareInterface::RobotHardwareInterface(ros::NodeHandle& nh) :
 
 RobotHardwareInterface::~RobotHardwareInterface() {
 	if(!all_motors_sim){
-
-        // Close UART port
-        ROS_INFO("closing uart_fd");
-        close(uart_fd);	
-		
 		// Close driver.
-		/*ROS_INFO("closing drv_fd");
-		close(drv_fd); */
+		ROS_INFO("closing drv_fd");
+		close(drv_fd); 
 	}
 	delete ctrl_manager;
 }
@@ -311,16 +284,7 @@ void RobotHardwareInterface::read(ros::Duration elapsed_time) {
 	}else{
 		// Read from driver. 
 		seek();
-		
-		const int s = sizeof(tmp_duty[0]) * n_joints;
-        int r = ::read(uart_fd, (char*)tmp_duty.data(), s);
-        if (r != s) {
-            ROS_WARN("read from UART went wrong!");
-        }
-        for (int id = 0; id < n_joints; id++) {
-            curr.pos_fb[id] = duty2rad(tmp_duty[id]);
-        }
-		/*
+	
 		const int s = sizeof(tmp_duty[0])*n_joints; // Symetrical not read.
 		int r = ::read(drv_fd, (char*)tmp_duty.data(), s);
 		if(r != s){
@@ -328,7 +292,7 @@ void RobotHardwareInterface::read(ros::Duration elapsed_time) {
 		}
 		for(int id = 0; id < n_joints; id++){
 			curr.pos_fb[id] = duty2rad(tmp_duty[id]);
-		} */
+		} 
 	}
 	
 	for(int id = 0; id < n_joints; id++){
@@ -359,20 +323,9 @@ void RobotHardwareInterface::read(ros::Duration elapsed_time) {
 }
 
 void RobotHardwareInterface::write(ros::Duration elapsed_time) {
-	if(!all_motors_sim && motors_en){
-		
-		// Write to UART
-        for (int id = 0; id < n_joints; id++) {
-            tmp_duty[id] = rad2duty(curr.pos_cmd[id]);
-        }
-
-        int r = ::write(uart_fd, (char*)tmp_duty.data(), sizeof(tmp_duty[0]) * n_joints);
-        if (r != sizeof(tmp_duty[0]) * n_joints) {
-            ROS_WARN("write to UART went wrong!");
-        }		
-		
+	if(!all_motors_sim && motors_en){		
 		// Write to driver.
-		/*for(int id = 0; id < n_joints; id++){
+		for(int id = 0; id < n_joints; id++){
 			tmp_duty[id] = rad2duty(curr.pos_cmd[id]);
 		}
 		
@@ -382,7 +335,7 @@ void RobotHardwareInterface::write(ros::Duration elapsed_time) {
 		int r = ::write(drv_fd, (char*)tmp_duty.data(), s);
 		if(r != s){
 			ROS_WARN("write went wrong!");
-		}*/
+		}
 	}
 }
 

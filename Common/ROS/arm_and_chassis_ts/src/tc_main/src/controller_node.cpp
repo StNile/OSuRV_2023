@@ -1,5 +1,5 @@
 
-#include "simple_ackermann_steering_controller.hpp"
+#include "controller.hpp"
 
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "simple_ackermann_steering_controller");
