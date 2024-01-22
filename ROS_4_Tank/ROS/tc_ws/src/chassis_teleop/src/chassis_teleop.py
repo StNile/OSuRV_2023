@@ -13,7 +13,7 @@ MAX_STEERING = math.radians(30) # [rad]
 
 
 
-class ManualTeleop:
+class ChassisTeleop:
 	def __init__(self):
 		
 		self.joy_sub = rospy.Subscriber("joy", Joy, self.on_joy)
@@ -25,7 +25,7 @@ class ManualTeleop:
 		
 		rospy.loginfo('''
 
-Manual Teleop:
+Chassis Teleop:
 	
 	L stick:
 		U	+axis	Go forward
@@ -52,6 +52,6 @@ Manual Teleop:
 
 
 if __name__ == '__main__':
-	rospy.init_node('manual_teleop')
-	controller = ManualTeleop()
+	rospy.init_node('chassis_teleop')
+	controller = ChassisTeleop()
 	rospy.spin()

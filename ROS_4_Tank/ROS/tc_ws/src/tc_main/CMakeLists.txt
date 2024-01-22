@@ -34,13 +34,13 @@ include_directories(
 )
 
 add_executable(
-	simple_ackermann_steering_controller
+	controller
 	src/UART.cpp
 	src/controller.cpp
 	src/controller_node.cpp
 )
 target_link_libraries(
-	simple_ackermann_steering_controller
+	controller
 	${catkin_LIBRARIES}
 )
 

@@ -6,6 +6,7 @@
 #include <ackermann_msgs/AckermannDriveStamped.h>
 #include <nav_msgs/Odometry.h>
 
+#include "UART.hpp"
 
 class SimpleAckermannSteeringController {
 public:
@@ -15,8 +16,8 @@ public:
 protected:
 	bool all_motors_sim;
 	
-	int drv_fd;
-	void seek();
+	UART* uart;
+
 	
 	ros::NodeHandle nh;
 

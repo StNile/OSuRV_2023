@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(wc_teleop)
+project(chassis_teleop)
 
 
 find_package(Eigen3 REQUIRED)
@@ -36,7 +36,7 @@ catkin_package(
 
 catkin_install_python(
 	PROGRAMS 
-		src/manual_teleop.py
+		src/chassis_teleop.py
 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

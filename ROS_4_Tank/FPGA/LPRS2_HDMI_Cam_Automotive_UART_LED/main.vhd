@@ -34,6 +34,8 @@ end entity main;
 architecture arch of main is
 	
 	
+	signal cmd : std_logic_vector(7 downto 0);
+	
 	signal chassis_cmd : std_logic_vector(5 downto 0);
 	signal chassis_speed : std_logic_vector(1 downto 0);
 	signal chassis_cmd_decoded : t_chassis;
@@ -45,6 +47,7 @@ architecture arch of main is
 	signal pwm_cnt : std_logic_vector(PWM_CNT_BITS-1 downto 0);
 	signal pwm_cnt_upper : std_logic_vector(2 downto 0);
 	signal pwm_cnt_threshold : std_logic_vector(3 downto 0);
+	
 begin
 	o_pix_rgb <= 
 		x"0000ff" when i_pix_x < 100 else
@@ -56,13 +59,26 @@ begin
 	o_uart_tx_d <= i_uart_rx_d;
 	o_uart_tx_dv <= i_uart_rx_dv;
 	
-	o_led <= i_uart_rx_d;
 	
-	chassis_cmd <= i_uart_rx_d(5 downto 0);
-	chassis_speed <= i_uart_rx_d(7 downto 6);
+	process(i_clk, in_rst)
+	begin
+		if in_rst = '0' then
+			cmd <= (others => '0');
+		elsif rising_edge(i_clk) then
+			if i_uart_rx_dv = '1' then
+				cmd <= i_uart_rx_d;
+			end if;
+		end if;
+	end process;
+	
+	o_led <= cmd;
+	
+	chassis_cmd <= cmd(5 downto 0);
+	chassis_speed <= cmd(7 downto 6);
 	-- For testing.
 	--chassis_cmd <= "000010";
 	--chassis_speed <= "00";
+	
 	
 	
 	chassis_cmd_decoded <= conv_t_chassis(chassis_cmd);

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-	<name>wc_teleop</name>
+	<name>chassis_teleop</name>
 	<version>0.1.0</version>
 	<description>
 		Teleop for wheeled chassis.

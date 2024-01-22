@@ -8,25 +8,25 @@
 	
 	
 	<node
-		name="simple_ackermann_steering_controller"
-		pkg="wc_main"
-		type="simple_ackermann_steering_controller"
+		name="controller"
+		pkg="tc_main"
+		type="controller"
 		output="screen"
 	>
 		<param name="all_motors_sim" type="bool" value="$(arg all_motors_sim)"/>
 		
 		<!-- Input topics -->
-		<remap from="motors_en" to="/wc/motors_en"/>
-		<remap from="cmd" to="/wc/cmd"/>
+		<remap from="motors_en" to="/chassis/motors_en"/>
+		<remap from="cmd" to="/chassis/cmd"/>
 		<!-- Output topics -->
-		<remap from="odom" to="/wc/odom"/>
+		<remap from="odom" to="/chassis/odom"/>
 	</node>
 	<node
 		if="$(arg en_debug)"
-		name="set_log_level__simple_ackermann_steering_controller"
+		name="set_log_level__controller"
 		pkg="rosservice"
 		type="rosservice"
-		args="call /simple_ackermann_steering_controller/set_logger_level '{logger: 'ros.wc_main', level: 'debug'}'"
+		args="call /controller/set_logger_level '{logger: 'ros.wc_main', level: 'debug'}'"
 	/>
 	
 </launch>

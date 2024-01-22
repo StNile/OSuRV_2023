@@ -104,7 +104,7 @@ _targets = {
 				''',
 		},
 	],
-	'__run_drv_wc': [
+	'__run_drv_chassis': [
 		{
 			'app' : '''
 				./build/test_bldc 0
@@ -207,7 +207,40 @@ _targets = {
 			'teleop': '''
 				tmux_no_wait
 				# Joypad must have analog on.
-				roslaunch wc_teleop manual_teleop.launch
+				roslaunch chassis_teleop chassis_teleop.launch
+				''',
+		},
+	],
+	'run_tc': [
+		{
+			'main': '''
+				tmux_no_wait
+				roslaunch tc_main main.launch \
+					all_motors_sim:=${SIM} \
+					small_screen:=true
+				''',
+			'teleop': '''
+				sleep 20
+				''',
+			'playground': '''
+				function list_controllers(){ \
+					rosrun controller_manager controller_manager list; \
+				}
+				function traj(){ \
+					rosrun common_teleop change_controller.py traj; \
+				}
+				tmux_exit NO_ENTER
+				''',
+		},
+		{
+			'routine': '''
+				tmux_no_wait
+				roslaunch common_teleop routines_teleop.launch name:=${ARM}
+				''',
+			'teleop': '''
+				tmux_no_wait
+				# Joypad must have analog on.
+				roslaunch chassis_teleop chassis_teleop.launch
 				''',
 		},
 	]
@@ -226,9 +259,10 @@ _dependencies = {
 	'build_drv': ['setup'],
 	'build': ['build_drv'],
 	'run_drv': ['setup', '__common_run_drv'],
-	'__run_drv_wc': ['setup', '__common_run_drv'],
+	'__run_drv_chassis': ['setup', '__common_run_drv'],
 	'run': ['run_drv', '__common_run'],
-	'run_wc': ['__run_drv_wc', '__common_run'],
+	'run_wc': ['__run_drv_chassis', '__common_run'],
+	'run_tc': ['__run_drv_chassis', '__common_run'],
 }
 
 

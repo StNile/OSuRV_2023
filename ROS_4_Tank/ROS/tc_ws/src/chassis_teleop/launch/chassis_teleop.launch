@@ -4,9 +4,9 @@
 	
 	
 	<node
-		name="manual_teleop"
-		pkg="wc_teleop"
-		type="manual_teleop.py"
+		name="chassis_teleop"
+		pkg="chassis_teleop"
+		type="chassis_teleop.py"
 		clear_params="true"
 		output="screen"
 		respawn="true"
@@ -14,7 +14,7 @@
 		<!-- Input topics -->
 		<remap from="joy" to="joy" />
 		<!-- Output topics -->
-		<remap from="cmd" to="/wc/cmd" />
+		<remap from="cmd" to="/chassis/cmd" />
 	</node>
 	
 </launch>
