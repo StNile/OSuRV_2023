@@ -1,8 +1,8 @@
 <package>
-	<name>wc_main</name>
+	<name>tc_main</name>
 	<version>0.1.0</version>
 	<description>
-		Wheeled chassis.
+		Tracked chassis.
 	</description>
 	<maintainer email="milos.subotic.sm@gmail.com">Milos Subotic</maintainer>
 	<author email="milos.subotic.sm@gmail.com">Milos Subotic</author>

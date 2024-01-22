@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-project(wc_main)
+project(tc_main)
 
 add_compile_options(-std=c++17)
 
@@ -35,6 +35,7 @@ include_directories(
 
 add_executable(
 	simple_ackermann_steering_controller
+	src/UART.cpp
 	src/controller.cpp
 	src/controller_node.cpp
 )

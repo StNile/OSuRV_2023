@@ -1,10 +1,11 @@
 
 #include "controller.hpp"
+#include "UART.hpp"
 
 // Config.
 #define LOOP_HZ 25
 
-#include "motor_ctrl.h"
+//#include "motor_ctrl.h"
 
 
 #define rad2deg(rad) (180/M_PI*(rad))
@@ -35,7 +36,6 @@ enum t_move {MOVE_FORWARD, MOVE_NONE, MOVE_REVERSE};
 
 #include <angles/angles.h>
 
-
 #define DEBUG(x) do{ ROS_DEBUG_STREAM(#x << " = " << x); }while(0)
 
 template<typename T>
@@ -46,9 +46,8 @@ static T sym_clamp(T x, T limit) {
 SimpleAckermannSteeringController::SimpleAckermannSteeringController(ros::NodeHandle& nh) :
 	nh(nh),
 	all_motors_sim(false),
-	drv_fd(-1),
-	motors_en(true),
-	UART uart("/dev/serial0", 115200)
+	//drv_fd(-1),
+	motors_en(true)
 {
 	
 	
@@ -61,7 +60,9 @@ SimpleAckermannSteeringController::SimpleAckermannSteeringController(ros::NodeHa
 	
 	if(!all_motors_sim){
 		// Open driver.
-		drv_fd = open(DEV_FN, O_RDWR);
+		UART uart ("/dev/serial0", 115200);
+		
+		/*drv_fd = open(DEV_FN, O_RDWR);
 		if(drv_fd < 0){
 			ROS_WARN(
 				"\"%s\" not opened! drv_fd = %d -> %s",
@@ -79,7 +80,7 @@ SimpleAckermannSteeringController::SimpleAckermannSteeringController(ros::NodeHa
 		);
 		if(r){
 			ROS_WARN("ioctl went wrong!");
-		}
+		} */
 	}
 	
 	motors_en_sub = nh.subscribe(
@@ -116,14 +117,14 @@ SimpleAckermannSteeringController::SimpleAckermannSteeringController(ros::NodeHa
 SimpleAckermannSteeringController::~SimpleAckermannSteeringController() {
 	if(!all_motors_sim){
 		// Close driver.
-		ROS_INFO("closing drv_fd");
-		close(drv_fd);
+		//ROS_INFO("closing drv_fd");
+		//close(drv_fd);
 	}
 }
 
 void SimpleAckermannSteeringController::seek() {
 	const int o = 0;
-	int r = lseek(drv_fd, SEEK_SET, o);
+	/*int r = lseek(drv_fd, SEEK_SET, o);
 	if(r != o){
 		if(r < 0){
 			ROS_WARN(
@@ -136,7 +137,7 @@ void SimpleAckermannSteeringController::seek() {
 				r, o
 			);
 		}
-	}
+	}*/
 }
 
 void SimpleAckermannSteeringController::publish_odom(const ros::TimerEvent& e) {
@@ -145,26 +146,27 @@ void SimpleAckermannSteeringController::publish_odom(const ros::TimerEvent& e) {
 	if(!all_motors_sim){
 		seek();
 		
-		motor_ctrl__read_arg_fb_t ra;
+	/*	motor_ctrl__read_arg_fb_t ra;
 		int r = read(drv_fd, (char*)&ra, sizeof(ra));
 		if(r != sizeof(ra)){
 			ROS_WARN("read went wrong!");
 		}
+	
 		
 		int64_t pulse_cnt_fb = ra.pulse_cnt_fb[0];
 #if 1
 		if(pulse_cnt_fb != prev_pulse_cnt_fb){
 			ROS_DEBUG("pulse_cnt_fb = %lld\n", (long long)pulse_cnt_fb);
-		}
-#endif
+		} 
+#endif	
 		traversed_path = pulse_cnt_fb * 0.1; //TODO Calib this constant.
 		
 		prev_pulse_cnt_fb = pulse_cnt_fb;
 	}else{
 		traversed_path += speed * (now - last).toSec();
 		last = now;
-	}
-	
+	*/}	
+
 	odom_msg.header.seq++;
 	odom_msg.header.stamp = now;
 	odom_msg.pose.pose.position.x = traversed_path;
@@ -191,7 +193,8 @@ void SimpleAckermannSteeringController::cmd_cb(
 	// acceleration
 	speed = msg->drive.speed;
 	float steering_angle = msg->drive.steering_angle;
-	
+	UART uart ("/dev/serial0", 115200);
+
 	// Limit backward speed to 90%.
 	if(speed < -90) {
 		speed = -90;
@@ -231,6 +234,8 @@ void SimpleAckermannSteeringController::cmd_cb(
 		duty[1] = rad2duty(sa);
 		
 		//UART
+    
+
 		t_turn turn = TURN_NONE;
 		if(steering_angle > M_PI/6){
 			turn = TURN_RIGHT;
@@ -275,10 +280,13 @@ void SimpleAckermannSteeringController::cmd_cb(
 		uart.write(cmd);
 		
 		seek();
+
+		/////
 		
-		int r = write(drv_fd, (char*)&duty, sizeof(duty));
+		
+		/*int r = write(drv_fd, (char*)&duty, sizeof(duty));
 		if(r != sizeof(duty)){
 			ROS_WARN("write went wrong!");
-		}
+		}*/
 	}
 }
